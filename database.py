@@ -17,8 +17,20 @@ class ForensicAudit(Base):
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     verdict = Column(String, index=True)
     risk_probability = Column(Float)
-    top_risk_drivers = Column(JSON)  # Stores top SHAP factors
+    top_risk_drivers = Column(JSON)
     raw_payload = Column(JSON)
 
-# Create tables
+class BatchJob(Base):
+    __tablename__ = "batch_jobs"
+
+    job_id = Column(String, primary_key=True, index=True)
+    status = Column(String, default="PENDING")  # PENDING, PROCESSING, COMPLETED, FAILED
+    total_records = Column(Integer, default=0)
+    processed_records = Column(Integer, default=0)
+    fraud_detected = Column(Integer, default=0)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    completed_at = Column(DateTime, nullable=True)
+    output_filepath = Column(String, nullable=True)
+    error_message = Column(String, nullable=True)
+
 Base.metadata.create_all(bind=engine)
