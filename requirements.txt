@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pandas
+scikit-learn
+joblib
+shap
+redis
+sqlalchemy
+python-multipart
+pydantic

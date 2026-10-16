@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # 1. In-Memory Message Broker
+  redis:
+    image: redis:alpine
+    container_name: fraud_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - fraud_net
+
+  # 2. Fast Edge Risk Gateway
+  api:
+    build: .
+    container_name: fraud_api
+    command: uvicorn app:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+      - ./audit_vault.db:/app/audit_vault.db
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - fraud_net
+
+  # 3. Asynchronous Forensic & Batch Worker
+  worker:
+    build: .
+    container_name: fraud_worker
+    command: python worker.py
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+      - ./audit_vault.db:/app/audit_vault.db
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - fraud_net
+
+networks:
+  fraud_net:
+    driver: bridge

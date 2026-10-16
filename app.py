@@ -24,7 +24,9 @@ pipeline = artifact["pipeline"]
 FRAUD_THRESHOLD = artifact["decision_threshold"]
 
 # 2. Redis Connection
-r = redis.Redis(host="localhost", port=6379, decode_responses=True)
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 STREAM_KEY = "fraud_audit_stream"
 BATCH_STREAM_KEY = "batch_job_stream"
 
